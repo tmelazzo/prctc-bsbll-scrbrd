@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baseball Scoreboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+        }
+        h1 {
+            margin: 20px;
+            color: #333;
+        }
+        .scoreboard {
+            width: 90%;
+            max-width: 800px;
+            background-color: #d4edda;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #333;
+        }
+        table td.highlight {
+            background-color: yellow;
+        }
+        .bso {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .bso div {
+            text-align: center;
+            padding: 10px;
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 10px;
+            width: 100px;
+        }
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #ff6f61;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #ff4a3b;
+        }
+    </style>
+</head>
+<body>
+    <h1>My Baseball Scoreboard</h1>
+    <div class="scoreboard">
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>1</th>
+                    <th>2</th>
+                    <th>3</th>
+                    <th>4</th>
+                    <th>5</th>
+                    <th>6</th>
+                    <th>7</th>
+                    <th>8</th>
+                    <th>9</th>
+                    <th>Runs</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Away</td>
+                    <td class="inning" data-team="away" data-inning="1">0</td>
+                    <td class="inning" data-team="away" data-inning="2">0</td>
+                    <td class="inning" data-team="away" data-inning="3">0</td>
+                    <td class="inning" data-team="away" data-inning="4">0</td>
+                    <td class="inning" data-team="away" data-inning="5">0</td>
+                    <td class="inning" data-team="away" data-inning="6">0</td>
+                    <td class="inning" data-team="away" data-inning="7">0</td>
+                    <td class="inning" data-team="away" data-inning="8">0</td>
+                    <td class="inning" data-team="away" data-inning="9">0</td>
+                    <td id="away-total">0</td>
+                </tr>
+                <tr>
+                    <td>Home</td>
+                    <td class="inning" data-team="home" data-inning="1">0</td>
+                    <td class="inning" data-team="home" data-inning="2">0</td>
+                    <td class="inning" data-team="home" data-inning="3">0</td>
+                    <td class="inning" data-team="home" data-inning="4">0</td>
+                    <td class="inning" data-team="home" data-inning="5">0</td>
+                    <td class="inning" data-team="home" data-inning="6">0</td>
+                    <td class="inning" data-team="home" data-inning="7">0</td>
+                    <td class="inning" data-team="home" data-inning="8">0</td>
+                    <td class="inning" data-team="home" data-inning="9">0</td>
+                    <td id="home-total">0</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="bso">
+            <div>Balls: <span id="balls">0</span></div>
+            <div>Strikes: <span id="strikes">0</span></div>
+            <div>Outs: <span id="outs">0</span></div>
+        </div>
+        <div class="buttons">
+            <button onclick="increment('balls')">B</button>
+            <button onclick="increment('strikes')">S</button>
+            <button onclick="increment('outs')">O</button>
+            <button onclick="clearBallsAndStrikes()">Clear Balls & Strikes</button>
+            <button onclick="clearBSO()">Clear Balls, Strikes, & Outs</button>
+            <button onclick="resetInningScore()">Inning Score back to 0</button>
+        </div>
+    </div>
+    <script>
+        let selectedInning = null;
+
+        function updateTotals() {
+            let awayTotal = 0, homeTotal = 0;
+            document.querySelectorAll('[data-team="away"]').forEach(cell => awayTotal += parseInt(cell.textContent));
+            document.querySelectorAll('[data-team="home"]').forEach(cell => homeTotal += parseInt(cell.textContent));
+            document.getElementById('away-total').textContent = awayTotal;
+            document.getElementById('home-total').textContent = homeTotal;
+        }
+
+        document.querySelectorAll('.inning').forEach(cell => {
+            cell.addEventListener('click', () => {
+                // Highlight the selected inning
+                if (selectedInning) {
+                    selectedInning.classList.remove('highlight');
+                }
+                selectedInning = cell;
+                selectedInning.classList.add('highlight');
+
+                // Increment the inning's score
+                const score = parseInt(cell.textContent);
+                cell.textContent = (score + 1) % 10; // Wrap score at 10
+                updateTotals();
+            });
+        });
+
+        function increment(type) {
+            const element = document.getElementById(type);
+            let value = parseInt(element.textContent);
+            element.textContent = (value + 1) % (type === 'outs' ? 4 : 4); // Wraps at 3 for balls/strikes, 3 for outs
+        }
+
+        function clearBallsAndStrikes() {
+            document.getElementById('balls').textContent = '0';
+            document.getElementById('strikes').textContent = '0';
+        }
+
+        function clearBSO() {
+            clearBallsAndStrikes();
+            document.getElementById('outs').textContent = '0';
+        }
+
+        function resetInningScore() {
+            if (selectedInning) {
+                selectedInning.textContent = '0';
+                updateTotals();
+            } else {
+                alert('Please select an inning to reset the score.');
+            }
+        }
+    </script>
+</body>
+</html>
